@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta de Consulta SECOP II - SCC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: #f8f9fa;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #004C99; /* Azul SCC */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .scc-blue { color: #004C99; }
+        .scc-gold { color: #F2B807; }
+        .bg-scc-blue { background-color: #004C99; }
+        .bg-scc-gold { background-color: #F2B807; }
+        .border-scc-gold { border-color: #F2B807; }
+        #info-modal { transition: opacity 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="text-gray-800">
+    
+    <!-- Encabezado con Logo y Título -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                    <img class="h-16 w-auto" src="https://scc.com.co/data/logo_SCC.jpg" alt="Logo SCC">
+                </div>
+                <div class="text-right">
+                    <h1 class="text-xl md:text-2xl font-bold scc-blue">Herramienta de Consulta Avanzada</h1>
+                    <p class="text-sm text-gray-500">Sistema Electrónico de Contratación Pública - SECOP II</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-1 bg-scc-gold"></div>
+    </header>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <main class="bg-white p-6 md:p-8 rounded-xl shadow-lg max-w-6xl mx-auto mt-8 border border-gray-200">
+            <form id="secop-form">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Columna 1 -->
+                    <div>
+                        <label for="proceso_de_compra" class="block text-sm font-medium text-gray-700 mb-1">Número(s) del Proceso</label>
+                        <input type="text" id="proceso_de_compra" name="proceso_de_compra" placeholder="Ej: CO1.PCCNTR.123, ..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="entidad" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Entidad</label>
+                        <input type="text" id="entidad" name="entidad" placeholder="Ej: ministerio, gobernacion" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="departamento" class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                        <input type="text" id="departamento" name="departamento" placeholder="Ej: Cundinamarca, Antioquia" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- Columna 2 -->
+                    <div>
+                        <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                        <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Bogotá, Medellín" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="modalidades" class="block text-sm font-medium text-gray-700 mb-1">Modalidades de Contratación</label>
+                        <input type="text" id="modalidades" name="modalidades" placeholder="Ej: Licitación, Concurso" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="estado_del_procedimiento" class="block text-sm font-medium text-gray-700 mb-1">Estado del Procedimiento</label>
+                        <select id="estado_del_procedimiento" name="estado_del_procedimiento" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Todos</option>
+                            <option value="Publicado">Publicado</option>
+                            <option value="Proceso en evaluación y observaciones">Proceso en evaluación y observaciones</option>
+                            <option value="Proceso adjudicado y celebrado">Proceso adjudicado y celebrado</option>
+                            <option value="Proceso cancelado">Proceso cancelado</option>
+                            <option value="Obsoleto">Obsoleto</option>
+                        </select>
+                    </div>
+
+                    <!-- Columna 3 -->
+                    <div>
+                        <label for="estado_de_apertura_del_proceso" class="block text-sm font-medium text-gray-700 mb-1">Estado de Apertura</label>
+                        <select id="estado_de_apertura_del_proceso" name="estado_de_apertura_del_proceso" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Todos</option>
+                            <option value="Abierto">Abierto</option>
+                            <option value="Cerrado">Cerrado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="fecha_inicio" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="fecha_fin" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div class="mt-8 border-t pt-6">
+                    <label for="max_registros" class="block text-sm font-medium text-gray-700 mb-1">Límite de Registros a Descargar</label>
+                    <select id="max_registros" name="max_registros" class="w-full max-w-xs mx-auto p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="50000">Estándar (50,000)</option>
+                        <option value="100000">Extendido (100,000)</option>
+                        <option value="200000">Máximo (200,000)</option>
+                    </select>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button type="submit" class="bg-scc-blue text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-opacity duration-300">
+                        Consultar y Descargar Excel
+                    </button>
+                </div>
+            </form>
+
+            <div id="loader-container" class="mt-8 text-center hidden">
+                <div class="loader inline-block"></div>
+                <p class="mt-2 text-gray-600">Consultando y generando reporte... Por favor espere.</p>
+            </div>
+            <div id="error-message" class="mt-6 text-center text-red-600 font-medium hidden"></div>
+        </main>
+
+        <footer class="mt-12 text-center text-xs text-gray-500">
+            <div class="max-w-4xl mx-auto border-t pt-4">
+                <p class="font-bold">Nota Legal:</p>
+                <p>Sociedad Colombiana de Consultoría SAS no se hace responsable por la exactitud, integridad o veracidad de la información presentada. Los datos son obtenidos en tiempo real a través de la API pública del portal de Datos Abiertos de Colombia (datos.gov.co) y reflejan la información tal como es suministrada por las entidades estatales. Se recomienda al usuario verificar siempre la información en la fuente original del SECOP.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Instrucciones Post-Descarga -->
+    <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center">
+            <h3 class="text-lg font-bold text-gray-800">¡Descarga Iniciada!</h3>
+            <p class="text-sm text-gray-600 mt-2">Tu archivo de Excel se está descargando. Al abrirlo, es posible que veas una barra amarilla de "VISTA PROTEGIDA".</p>
+            <img src="https://i.imgur.com/bESeHfa.png" alt="Barra de Habilitar Edición en Excel" class="my-4 border rounded-md"/>
+            <p class="text-sm text-gray-600">Esto es normal. Simplemente haz clic en el botón <strong class="scc-blue">'Habilitar edición'</strong> para empezar a trabajar.</p>
+            <button id="close-modal-btn" class="mt-6 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('secop-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // IMPORTANTE: Cuando subas esto a producción, reemplaza esta URL
+            // con la URL que te de el servicio de hosting (ej: Render).
+            const API_URL = '/api/query'; // Para pruebas locales
+            // const API_URL = 'https://tu-app-en-render.onrender.com/api/query'; // Ejemplo para producción
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (value) { data[key] = value; }
+            });
+
+            const loader = document.getElementById('loader-container');
+            const errorDiv = document.getElementById('error-message');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const infoModal = document.getElementById('info-modal');
+
+            loader.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = downloadUrl;
+                
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = "secop_reporte.xlsx";
+                if (contentDisposition && contentDisposition.indexOf('attachment') !== -1) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+
+                infoModal.classList.remove('hidden');
+                setTimeout(() => infoModal.classList.remove('opacity-0'), 10);
+
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+                submitButton.disabled = false;
+                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            const infoModal = document.getElementById('info-modal');
+            infoModal.classList.add('opacity-0');
+            setTimeout(() => infoModal.classList.add('hidden'), 300);
+        });
+    </script>
+</body>
+</html>
