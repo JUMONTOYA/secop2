@@ -14,7 +14,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, PatternFill
 
 # --- Configuración de la aplicación Flask ---
-# El argumento static_folder='.' le dice a Flask que sirva archivos desde el directorio actual
 app = Flask(__name__, static_folder='.')
 
 # --- Lógica del Script Original (adaptada a funciones) ---
@@ -129,8 +128,20 @@ def crear_excel_en_memoria(df):
     column_names = list(df.columns)
     ws_datos.append(column_names)
 
-    for row in dataframe_to_rows(df, index=False, header=False):
-        ws_datos.append(row)
+    # --- LÓGICA DE HIPERVÍNCULO CORREGIDA ---
+    url_col_idx = -1
+    if 'urlproceso' in column_names:
+        url_col_idx = column_names.index('urlproceso') + 1
+
+    # Iterar sobre las filas del DataFrame para poder acceder a los datos y al índice
+    for row_index, row_data in enumerate(df.itertuples(index=False), start=3): # start=3 porque la data empieza en la fila 3
+        ws_datos.append(list(row_data))
+        # Si encontramos la columna de URL, creamos el hipervínculo
+        if url_col_idx != -1:
+            cell = ws_datos.cell(row=row_index, column=url_col_idx)
+            if cell.value and isinstance(cell.value, str) and cell.value.startswith('http'):
+                cell.hyperlink = cell.value
+                cell.style = "Hyperlink"
     
     tab = Table(displayName="TablaDatos", ref=f"A2:{get_column_letter(ws_datos.max_column)}{ws_datos.max_row}")
     style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
@@ -140,7 +151,7 @@ def crear_excel_en_memoria(df):
     for column_cells in ws_datos.columns:
         if isinstance(column_cells[0], tuple): 
             continue
-        column_letter = get_column_letter(column_cells[0].column)
+        column_letter = get_column_letter(column_cells[1].column) # Usar el índice 1 para evitar la celda combinada
         length = max(len(str(cell.value or "")) for cell in column_cells)
         ws_datos.column_dimensions[column_letter].width = length + 2
     
@@ -152,7 +163,6 @@ def crear_excel_en_memoria(df):
 
 @app.route('/')
 def index():
-    # Sirve el archivo con el nuevo nombre
     return send_from_directory(app.static_folder, 'herramienta-secop.html')
 
 @app.route('/api/query', methods=['POST'])
@@ -195,7 +205,6 @@ def handle_query():
         logging.error(f"Error inesperado en el servidor: {e}", exc_info=True)
         return jsonify({"error": "Ocurrió un error inesperado en el servidor."}), 500
 
-# Esta parte solo se usa para pruebas locales.
-# En producción, el servidor Gunicorn inicia la app.
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
